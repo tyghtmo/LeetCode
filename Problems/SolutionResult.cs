@@ -7,6 +7,9 @@ public class SolutionResult(string Name, List<RunResult> runResults)
     public string Name { get; init; } = Name;
     public List<RunResult> RunResults { get; init; } = runResults;
 
+    public int SuccessCount => RunResults.Count(r => r.IsSuccess);
+    public int TotalCount => RunResults.Count;
+
     public override string ToString()
     {
         StringBuilder sb = new();

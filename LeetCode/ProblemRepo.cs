@@ -1,8 +1,6 @@
 using System.Collections;
+using System.Reflection;
 using Problems;
-using Problems.Easy;
-using Problems.Hard;
-using Problems.Medium;
 
 namespace LeetCode;
 
@@ -12,15 +10,13 @@ internal class ProblemRepo : IEnumerable<IProblemDefinition>
 
     public ProblemRepo()
     {
-        // TODO use reflection to grab all IProblemDefinitions from Problems assembly.
-        // TODO allow filtering by ProblemType
+        _problems = GetProblemsFromAssembly([ProblemType.Easy, ProblemType.Medium, ProblemType.Hard]);
+    }
 
-        _problems = [
-            // new TwoSum(),
-            // new PascalsTriangle(),
-            // new TrappingRainWater(),
-            new LongestConsecutiveSequence()
-        ];
+    public ProblemRepo(List<ProblemType> TypeFilter)
+    {
+
+        _problems = GetProblemsFromAssembly(TypeFilter);
     }
 
     public IEnumerator<IProblemDefinition> GetEnumerator()
@@ -31,5 +27,33 @@ internal class ProblemRepo : IEnumerable<IProblemDefinition>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return _problems.GetEnumerator();
+    }
+
+    private static List<IProblemDefinition> GetProblemsFromAssembly(List<ProblemType> ProblemTypes)
+    {
+        var commonInterface = typeof(IProblemDefinition);
+
+        var problems = Assembly.GetAssembly(commonInterface)?
+            .GetTypes()
+            .Where(p => commonInterface.IsAssignableFrom(p) && p.IsClass);
+
+        List<IProblemDefinition> result = [];
+
+        if (problems is null || !problems.Any())
+        {
+            return result;
+        }
+
+        foreach (var problemClass in problems)
+        {
+            IProblemDefinition instance = (IProblemDefinition?)Activator.CreateInstance(problemClass) ?? throw new Exception($"Error creating instance of {problemClass.Name}");
+            
+            if (ProblemTypes.Contains(instance.ProblemType))
+            {
+                result.Add(instance);
+            }
+        }
+
+        return result;
     }
 }

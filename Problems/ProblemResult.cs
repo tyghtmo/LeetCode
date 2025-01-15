@@ -7,6 +7,9 @@ public class ProblemResult(IProblemDefinition definition, IEnumerable<SolutionRe
     public string Name { get; init; } = definition.Name;
     public IEnumerable<SolutionResult> Results { get; init; } = solutionResults;    
 
+    public int SuccessCount => Results.Sum(r => r.SuccessCount);
+    public int TotalCount => Results.Sum(r => r.TotalCount);
+
     public override string ToString()
     {
         StringBuilder sb = new();
